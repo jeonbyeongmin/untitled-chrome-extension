@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>광고 음소거 테스트 페이지</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      .video-container {
+        position: relative;
+        margin: 20px 0;
+      }
+      video {
+        width: 100%;
+        max-width: 600px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+      }
+      .ad-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        display: none;
+      }
+      .skip-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: none;
+      }
+      .controls {
+        margin: 10px 0;
+      }
+      button {
+        margin: 5px;
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .status {
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+      }
+      .status.muted {
+        background-color: #ffe6e6;
+        border: 1px solid #ffcccc;
+        color: #cc0000;
+      }
+      .status.unmuted {
+        background-color: #e6ffe6;
+        border: 1px solid #ccffcc;
+        color: #006600;
+      }
+      .test-section {
+        border: 2px dashed #ccc;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+      .site-simulator {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 10px 0;
+      }
+      .site-btn {
+        background: #28a745;
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+      .site-btn.active {
+        background: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔇 광고 음소거 확장 프로그램 테스트</h1>
+      <p>
+        이 페이지는 광고 음소거 확장 프로그램의 동작을 테스트하기 위한
+        페이지입니다.
+      </p>
+
+      <div class="status" id="extensionStatus">
+        확장 프로그램 상태 확인 중...
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>📺 비디오 플레이어</h2>
+      <div class="video-container">
+        <video id="testVideo" controls>
+          <source
+            src="https://www.w3schools.com/html/mov_bbb.mp4"
+            type="video/mp4" />
+          <p>브라우저가 HTML5 비디오를 지원하지 않습니다.</p>
+        </video>
+        <div class="ad-container" id="adBadge">광고</div>
+        <button class="skip-button" id="skipButton">5초 후 건너뛰기</button>
+      </div>
+
+      <div class="controls">
+        <button onclick="playVideo()">▶️ 재생</button>
+        <button onclick="pauseVideo()">⏸️ 일시정지</button>
+        <button onclick="toggleMute()">🔇 음소거 토글</button>
+        <button onclick="setVolume(0.5)">🔉 볼륨 50%</button>
+        <button onclick="setVolume(1.0)">🔊 볼륨 100%</button>
+      </div>
+
+      <div class="status" id="videoStatus"></div>
+    </div>
+
+    <div class="container">
+      <h2>🧪 광고 시뮬레이션 테스트</h2>
+      <p>
+        다양한 사이트의 광고 요소들을 시뮬레이션하여 확장 프로그램의 감지 로직을
+        테스트합니다.
+      </p>
+
+      <div class="site-simulator">
+        <button class="site-btn" onclick="simulateAd('tving')">
+          TVING 광고 시뮬레이션
+        </button>
+        <button class="site-btn" onclick="simulateAd('youtube')">
+          YouTube 광고 시뮬레이션
+        </button>
+        <button class="site-btn" onclick="simulateAd('netflix')">
+          Netflix 광고 시뮬레이션
+        </button>
+        <button class="site-btn" onclick="simulateAd('wavve')">
+          Wavve 광고 시뮬레이션
+        </button>
+        <button class="site-btn" onclick="clearAd()">광고 제거</button>
+      </div>
+
+      <div class="test-section" id="adTestArea">
+        <!-- 광고 시뮬레이션 요소들이 여기에 동적으로 추가됩니다 -->
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>📊 실시간 상태</h2>
+      <div id="realTimeStatus">
+        <p><strong>비디오 상태:</strong> <span id="videoState">정지됨</span></p>
+        <p><strong>음소거 상태:</strong> <span id="muteState">해제됨</span></p>
+        <p><strong>볼륨:</strong> <span id="volumeState">100%</span></p>
+        <p>
+          <strong>광고 감지:</strong> <span id="adDetected">감지되지 않음</span>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const video = document.getElementById("testVideo")
+      const adBadge = document.getElementById("adBadge")
+      const skipButton = document.getElementById("skipButton")
+      const adTestArea = document.getElementById("adTestArea")
+
+      let adSimulationActive = false
+      let currentSite = null
+
+      // 비디오 제어 함수들
+      function playVideo() {
+        video.play()
+      }
+
+      function pauseVideo() {
+        video.pause()
+      }
+
+      function toggleMute() {
+        video.muted = !video.muted
+      }
+
+      function setVolume(level) {
+        video.volume = level
+      }
+
+      // 광고 시뮬레이션 함수들
+      function simulateAd(site) {
+        clearAd()
+        currentSite = site
+        adSimulationActive = true
+
+        // 기본 광고 표시
+        adBadge.style.display = "block"
+        skipButton.style.display = "block"
+
+        // 사이트별 광고 요소 추가
+        switch (site) {
+          case "tving":
+            simulateTvingAd()
+            break
+          case "youtube":
+            simulateYouTubeAd()
+            break
+          case "netflix":
+            simulateNetflixAd()
+            break
+          case "wavve":
+            simulateWavveAd()
+            break
+        }
+
+        updateAdStatus()
+      }
+
+      function simulateTvingAd() {
+        adTestArea.innerHTML = `
+                <div class="ad-container" style="display: block;">TVING 광고</div>
+                <div class="advertisement">광고 컨테이너</div>
+                <button class="skip-button" style="display: block;">건너뛰기</button>
+                <div class="ad-text">광고가 재생 중입니다</div>
+            `
+      }
+
+      function simulateYouTubeAd() {
+        adTestArea.innerHTML = `
+                <div class="ytp-ad-badge" style="display: block;">광고</div>
+                <div class="ytp-ad-text">광고 • 5초 후 건너뛸 수 있습니다</div>
+                <button class="ytp-ad-skip-button" style="display: block;">광고 건너뛰기</button>
+                <div class="ytp-ad-progress">♦♦♦♦♦</div>
+            `
+      }
+
+      function simulateNetflixAd() {
+        adTestArea.innerHTML = `
+                <div data-uia="ad-badge" style="display: block;">Ad</div>
+                <div class="ad-container">Netflix Advertisement</div>
+                <button data-uia="ad-skip-button" style="display: block;">Skip Ad</button>
+            `
+      }
+
+      function simulateWavveAd() {
+        adTestArea.innerHTML = `
+                <div class="player-ad-container" style="display: block;">Wavve 광고</div>
+                <button class="skip-btn" style="display: block;">건너뛰기</button>
+                <div class="ad-timer">광고 5초 남음</div>
+                <div class="commercial">Commercial Break</div>
+            `
+      }
+
+      function clearAd() {
+        adSimulationActive = false
+        currentSite = null
+        adBadge.style.display = "none"
+        skipButton.style.display = "none"
+        adTestArea.innerHTML = "<p>광고 시뮬레이션이 비활성화되었습니다.</p>"
+        updateAdStatus()
+      }
+
+      function updateAdStatus() {
+        document.getElementById("adDetected").textContent = adSimulationActive
+          ? `${currentSite} 광고 감지됨`
+          : "감지되지 않음"
+      }
+
+      // 비디오 이벤트 리스너
+      video.addEventListener("play", () => {
+        document.getElementById("videoState").textContent = "재생 중"
+      })
+
+      video.addEventListener("pause", () => {
+        document.getElementById("videoState").textContent = "일시정지"
+      })
+
+      video.addEventListener("volumechange", () => {
+        const isMuted = video.muted
+        const volume = Math.round(video.volume * 100)
+
+        document.getElementById("muteState").textContent = isMuted
+          ? "음소거됨"
+          : "해제됨"
+        document.getElementById("volumeState").textContent = `${volume}%`
+
+        // 상태 표시 업데이트
+        const statusDiv = document.getElementById("videoStatus")
+        if (isMuted) {
+          statusDiv.className = "status muted"
+          statusDiv.textContent = "🔇 비디오가 음소거되었습니다"
+        } else {
+          statusDiv.className = "status unmuted"
+          statusDiv.textContent = "🔊 비디오 음소거가 해제되었습니다"
+        }
+      })
+
+      // 확장 프로그램 상태 확인
+      function checkExtensionStatus() {
+        const statusDiv = document.getElementById("extensionStatus")
+
+        if (typeof chrome !== "undefined" && chrome.runtime) {
+          statusDiv.className = "status unmuted"
+          statusDiv.innerHTML =
+            "✅ 확장 프로그램이 감지되었습니다<br>현재 사이트에서 광고 음소거 기능이 활성화됩니다."
+        } else {
+          statusDiv.className = "status muted"
+          statusDiv.innerHTML =
+            "❌ 확장 프로그램이 감지되지 않았습니다<br>Chrome 확장 프로그램을 설치하고 활성화해주세요."
+        }
+      }
+
+      // 페이지 로드 시 상태 확인
+      document.addEventListener("DOMContentLoaded", () => {
+        checkExtensionStatus()
+        updateAdStatus()
+
+        // 초기 비디오 상태 설정
+        document.getElementById("videoState").textContent = "정지됨"
+        document.getElementById("muteState").textContent = "해제됨"
+        document.getElementById("volumeState").textContent = "100%"
+      })
+
+      // 5초마다 상태 업데이트
+      setInterval(() => {
+        if (!video.paused && !video.ended) {
+          // 재생 중일 때만 상태 업데이트
+          updateAdStatus()
+        }
+      }, 1000)
+    </script>
+  </body>
+</html>

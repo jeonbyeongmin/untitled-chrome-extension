@@ -1,13 +1,15 @@
 {
   "name": "ad-mute",
-  "displayName": "Ad mute",
-  "version": "0.0.1",
-  "description": "A basic Plasmo extension.",
+  "displayName": "광고 음소거 (Ad Mute)",
+  "version": "0.1.0",
+  "description": "TVING, YouTube 등 스트리밍 사이트의 광고를 자동으로 음소거하는 확장 프로그램",
   "author": "jeonbyeongmin",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
-    "package": "plasmo package"
+    "package": "plasmo package",
+    "clean": "rm -rf build .plasmo",
+    "test": "echo \"광고 음소거 확장 프로그램\" && echo \"테스트 페이지: file://$(pwd)/test.html\""
   },
   "dependencies": {
     "plasmo": "0.90.5",
@@ -25,7 +27,15 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "https://*.tving.com/*",
+      "https://*.youtube.com/*",
+      "https://*.netflix.com/*",
+      "https://*.wavve.com/*"
+    ],
+    "permissions": [
+      "storage",
+      "activeTab",
+      "tabs"
     ]
   }
 }
